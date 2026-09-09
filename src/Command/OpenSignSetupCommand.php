@@ -68,7 +68,11 @@ class OpenSignSetupCommand extends Command
         /** @var array<string, array<string, string|bool>> $config */
         $config = Yaml::parseFile($configPath);
 
-        $password = $config['admin']['password'] ?? '';
+        // Yaml::parseFile never resolves %env()% — this file is committed, so the
+        // password can't live in it directly. OPENSIGN_SETUP_ADMIN_PASSWORD lets a
+        // real secret (Doppler, etc.) override the YAML placeholder at run time.
+        $envPassword = $_ENV['OPENSIGN_SETUP_ADMIN_PASSWORD'] ?? getenv('OPENSIGN_SETUP_ADMIN_PASSWORD');
+        $password = is_string($envPassword) && $envPassword !== '' ? $envPassword : ($config['admin']['password'] ?? '');
         if (! is_string($password)) {
             $io->error('config/opensign_setup.yaml: admin.password must be a string.');
 
@@ -94,6 +98,8 @@ class OpenSignSetupCommand extends Command
 
             return Command::FAILURE;
         }
+
+        $config['admin']['password'] = $password;
 
         try {
             $headers = [

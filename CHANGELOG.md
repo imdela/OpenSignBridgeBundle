@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-09-09
+
+### Fixed
+
+- `opensignb:opensign:setup` can now take its admin bootstrap password from an
+  `OPENSIGN_SETUP_ADMIN_PASSWORD` environment variable instead of only the
+  committed `config/opensign_setup.yaml` — that file is parsed with
+  `Yaml::parseFile()` (not the Symfony container), so `%env()%` syntax in it was
+  never resolved, forcing a real secret to either sit in a committed file or be
+  hand-edited on every environment. The YAML value stays as a fallback for local
+  dev.
+
 ## [0.3.2] - 2026-08-31
 
 ### Added
